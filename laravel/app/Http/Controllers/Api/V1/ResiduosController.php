@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Residuo;
+use App\Jobs\ImportFile;
 use Illuminate\Http\Request;
-use App\Imports\ResiduosImport;
-use App\Jobs\NotifyCompletedImport;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Request as ModelRequest;
 use Illuminate\Support\Facades\Validator;
 
@@ -53,25 +51,22 @@ class ResiduosController extends Controller
         }
         if ($file = $request->file('file')) {
             
-            //$path = $file->store('public/files');
+            $path = $file->store('public/files');
             $name = $file->getRealPath();
             $importedBy = new ModelRequest();
             $importedBy->status = 'processando';
             $importedBy->save();
 
-
             //inserir arquivo na fila
-            Excel::queueImport(new ResiduosImport($importedBy), $name)
-            ->chain([
-                new NotifyCompletedImport($importedBy),
-            ]);
+            ImportFile::dispatch($importedBy,$path)->delay(now()->addSeconds(15));
+          /*   $importJob = (new ImportFile($importedBy,$name))->delay(now()->addMinutes(10));;
+            dispatch($importJob)->delay(now()->addMinutes(10));; */
  
-            
-              
             return response()->json([
                 'errors'=>'',
                 "message" => "Upload efetuado com sucesso!",
-                "request" => $importedBy->id
+                "request" => $importedBy->id,
+                "path" => $path
             ]);
   
         } 

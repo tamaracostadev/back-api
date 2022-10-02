@@ -19,8 +19,10 @@ class NotifyCompletedImport implements ShouldQueue
 
     public function handle()
     {
-        $this->request->status = 'Completo';
-        $this->request->mensagem = "Arquivo processado com sucesso";
-        $this->request->save();
+        if($this->request->status !== 'erro'){
+            $this->request->status = 'Completo';
+            $this->request->mensagem = "Arquivo processado com sucesso";
+            $this->request->save();
+        }
     }
 }
