@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\RequestController;
+use App\Http\Controllers\Api\V1\ResiduosController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +16,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+Route::prefix('v1')->group(function(){
+    Route::post('/store',[ResiduosController::class,'store']);
+    Route::delete('/delete/{id}',[ResiduosController::class,'delete']);
+    Route::put('/edit/{id}',[ResiduosController::class,'update']);
+    Route::get('/status',[RequestController::class,'buscaStatus']);
+    Route::get('/get',[ResiduosController::class,'index']);
 });
